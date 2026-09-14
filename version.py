@@ -1,6 +1,6 @@
 """Centralized OneBoard application and Windows release version."""
 
-VERSION = "0.2.0-rc1"
+VERSION = "0.2.0-rc2"
 WINDOWS_VERSION = "0.2.0.0"
 
 # Customer release discovery stays inert until the distributor supplies a real
