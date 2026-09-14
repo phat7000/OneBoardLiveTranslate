@@ -1,0 +1,46 @@
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.pyc
+*.pyo
+.coverage
+htmlcov/
+.venv/
+.pip-cache/
+.uv-cache/
+.tmp/
+models/
+logs/
+transcripts/
+exports/
+user_settings.json
+
+# Local credentials and private keys
+.env
+.env.*
+credentials.json
+secrets.json
+*.pem
+*.key
+*.p12
+*.pfx
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Distribution
+dist/
+build/
+release/
+release/*.zip
+release/*.exe
+*.egg-info/

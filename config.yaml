@@ -1,0 +1,77 @@
+# LiveTrans Configuration
+
+audio:
+  # WASAPI loopback device name (null = default output device)
+  device: null
+  # Sample rate for capture
+  sample_rate: 16000
+  # Audio chunk duration in seconds for VAD processing (32ms = Silero VAD native window)
+  chunk_duration: 0.032
+
+asr:
+  # ASR engine: whisper, funasr, anime-whisper
+  asr_engine: "whisper"
+  # Model size: tiny, base, small, medium, large-v3
+  model_size: "small"
+  # FunASR model: sensevoice-small, funasr-nano-2512, funasr-mlt-nano-2512
+  funasr_model: "sensevoice-small"
+  # Device: cuda or cpu
+  device: "cpu"
+  # Compute type: float16, int8_float16, int8
+  compute_type: "int8"
+  # Language: auto, en, ja, zh, ko, etc.
+  language: "en"
+  # Minimum speech duration (seconds) before sending to ASR
+  min_speech_duration: 1.0
+  # Maximum speech duration (seconds) before forced segmentation
+  max_speech_duration: 8.0
+  # VAD threshold (0.0 - 1.0)
+  vad_threshold: 0.5
+  # SenseVoice input padding bucket in seconds (0 = disabled)
+  sensevoice_pad_seconds: 0.5
+  # faster-whisper input padding bucket in seconds (0 = disabled)
+  whisper_pad_seconds: 0.5
+
+translation:
+  # OpenAI-compatible API settings
+  api_base: "http://127.0.0.1:11434/v1"
+  api_key: "ollama"
+  model: "qwen3:4b-instruct-2507-q4_K_M"
+  # Target language for translation
+  target_language: "vi"
+  # Source language hint (auto = detect from ASR)
+  source_language: "en"
+  # Context window size (number of recent translations to include)
+  context_window: 10
+  # Max tokens for translation response
+  max_tokens: 256
+  # Temperature
+  temperature: 0.3
+  # Enable streaming output
+  streaming: true
+  # null uses translator.DEFAULT_PROMPT; users can override it in Advanced.
+  system_prompt: null
+
+subtitle:
+  # Font family
+  font_family: "Microsoft YaHei"
+  # Font size
+  font_size: 28
+  # Font color (hex)
+  font_color: "#FFFFFF"
+  # Outline color
+  outline_color: "#000000"
+  # Outline width
+  outline_width: 2
+  # Subtitle position from bottom (pixels)
+  bottom_margin: 80
+  # Show original text above translation
+  show_original: true
+  # Original text font size
+  original_font_size: 20
+  # Original text color
+  original_color: "#CCCCCC"
+  # Subtitle display duration (seconds)
+  display_duration: 5.0
+  # Window opacity (0.0 - 1.0)
+  opacity: 0.95
