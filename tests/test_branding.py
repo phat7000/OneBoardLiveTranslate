@@ -32,9 +32,9 @@ def test_branding_constants():
     assert UPSTREAM_PROJECT_URL == "https://github.com/TheDeathDragon/LiveTranslate"
 
 
-def test_rc3_version_is_centralized_for_branding_and_windows_metadata():
-    assert VERSION == APP_VERSION == "0.2.0-rc3"
-    assert WINDOWS_VERSION == WINDOWS_FILE_VERSION == "0.2.0.3"
+def test_rc4_version_is_centralized_for_branding_and_windows_metadata():
+    assert VERSION == APP_VERSION == "0.2.0-rc4"
+    assert WINDOWS_VERSION == WINDOWS_FILE_VERSION == "0.2.0.4"
 
 
 def test_open_source_notice_exposes_release_licensing_and_attribution():

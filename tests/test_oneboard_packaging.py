@@ -453,6 +453,13 @@ def test_release_workflow_is_manual_and_uses_only_oneboard_builder():
     assert "OneBoardLiveTranslate-release-candidate" in workflow
 
 
+def test_installer_uses_numeric_windows_version_for_file_and_product_metadata():
+    installer = Path("packaging/OneBoardLiveTranslate.iss").read_text(encoding="utf-8")
+    assert "VersionInfoVersion={#WindowsVersion}" in installer
+    assert "VersionInfoProductVersion={#WindowsVersion}" in installer
+    assert "VersionInfoProductVersion={#AppVersion}" not in installer
+
+
 def test_readme_customer_path_uses_oneboard_executable():
     for name in ("README.md", "README_zh.md"):
         readme = Path(name).read_text(encoding="utf-8")
