@@ -1,8 +1,7 @@
 """Centralized OneBoard application and Windows release version."""
 
-VERSION = "0.2.0-rc4"
-# Windows file versions are numeric; the fourth field maps to release candidate 4.
-WINDOWS_VERSION = "0.2.0.4"
+VERSION = "1.0.0"
+WINDOWS_VERSION = "1.0.0.0"
 
 # Customer release discovery stays inert until the distributor supplies a real
 # OneBoard endpoint. These values must never point at the upstream fork source.

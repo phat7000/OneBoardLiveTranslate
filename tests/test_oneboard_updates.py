@@ -30,11 +30,11 @@ def check_manifest(payload, **settings):
 
 
 def test_new_oneboard_release_is_offered_without_installing():
-    result = check_manifest({"version": "0.2.0", "channel": "stable",
-                             "release_url": "https://releases.example.test/0.2.0"})
+    result = check_manifest({"version": "1.1.0", "channel": "stable",
+                             "release_url": "https://releases.example.test/1.1.0"})
     assert result.status == "available"
-    assert result.version == "0.2.0"
-    assert result.release_url.endswith("/0.2.0")
+    assert result.version == "1.1.0"
+    assert result.release_url.endswith("/1.1.0")
 
 
 @pytest.mark.parametrize("version", ["0.1.0", "0.2.0-rc1", "0.2.0-beta9"])
