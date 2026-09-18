@@ -2,123 +2,155 @@
 
 OneBoard Live Translate is a minimal fork of
 [TheDeathDragon/LiveTranslate](https://github.com/TheDeathDragon/LiveTranslate).
-OneBoard Live Translate is distributed as free and open-source software under
-[`GPL-3.0-only`](LICENSE). The exact upstream LiveTranslate MIT license and
-copyright notice are preserved separately in
-[`LICENSES/LiveTranslate-MIT.txt`](LICENSES/LiveTranslate-MIT.txt).
-The MIT license covering the vendored FunASR Python sources is preserved in
+The OneBoard work is distributed under [`GPL-3.0-only`](LICENSE). The upstream
+LiveTranslate MIT notice is preserved in
+[`LICENSES/LiveTranslate-MIT.txt`](LICENSES/LiveTranslate-MIT.txt), and the
+vendored FunASR Python source notice is preserved in
 [`LICENSES/FunASR-MIT.txt`](LICENSES/FunASR-MIT.txt).
 
-The Windows package also contains third-party software. Each component remains
-the property of its respective copyright holder and is provided under its own
-license. Product names are used only to identify those components and do not
-imply endorsement.
+The Windows package also contains separately licensed third-party software.
+Each component remains the property of its copyright holder. Product names are
+used only for identification and do not imply endorsement. This inventory is
+not legal advice or a claim of patent, codec, model, export-control or commercial
+clearance.
 
-This document is an inventory aid, not legal advice or a statement of commercial
-clearance. The release publisher must review the exact artifact and satisfy all
-applicable license terms before distribution.
+## RC3 package policy and artifact-local records
 
-**Project-license decision recorded on 2026-09-11:** release OneBoard Live
-Translate under `GPL-3.0-only` and retain PyQt6. The public PyQt6 wheel's
-`GPL-3.0-only` terms are compatible with that chosen strategy, so PyQt6 is no
-longer a separate release blocker; a PySide6 migration and a commercial PyQt
-license are not required for this strategy. This does not clear the exact native
-libraries, PyAV/FFmpeg codecs, downloaded FunASR/SenseVoice model weights, other
-model licenses, or any future GPU bundle. Those artifact-level release gates
-remain open.
+The `0.2.0-rc3` builder inventories the exact distributions that remain after
+pruning and fails if any one lacks an installed or pinned supplemental license
+file. Every package contains:
 
-## Exact records in each Windows package
+- `LICENSE` (OneBoard GPL-3.0-only);
+- the complete tracked `LICENSES/` set listed below;
+- this notice and `RC3_RUNTIME_AUDIT.md`;
+- `runtime/LICENSE.txt` for CPython;
+- each retained wheel's original license/notice files;
+- `runtime-requirements.txt` and `dependency-inventory.json` for Python
+  distributions;
+- `native-component-inventory.json` for significant DLL/static components; and
+- `runtime-exclusions.json`, recording reviewed removals and their rationale.
 
-The repository uses open dependency ranges, so versions and transitive
-dependencies may change between builds. The builder removes known test-only
-packages and package test trees, but this is not a fully locked dependency set.
-Each Windows package therefore includes:
+Package metadata can be incomplete and does not by itself establish compliance.
+The inventories name exact files and provenance; the corresponding texts remain
+the controlling records.
 
-- `LICENSE`, containing the OneBoard `GPL-3.0-only` license text;
-- `LICENSES/LiveTranslate-MIT.txt`, preserving the exact upstream LiveTranslate
-  MIT license and copyright notice;
-- `LICENSES/FunASR-MIT.txt`, preserving the complete MIT license and copyright
-  notice for the vendored FunASR Python sources;
-- `THIRD_PARTY_NOTICES.md`, containing this release-publisher inventory;
-- `runtime-requirements.txt`, listing every Python distribution copied into that
-  particular build;
-- `dependency-inventory.json`, containing the available package license metadata
-  and paths to installed license/notice files;
-- the original license and notice files under
-  `runtime/Lib/site-packages/*-info/`; and
-- `runtime/LICENSE.txt`, covering the bundled CPython runtime.
+## RC2 blocker disposition in RC3
 
-Those artifact-local files take precedence over this summary. Package metadata
-can be blank, inaccurate, or limited to a Python wrapper while a wheel contains
-additional native libraries. A package inventory is therefore not, by itself, a
-license-compliance determination.
+| Area | RC3 disposition |
+| --- | --- |
+| PyAV / FFmpeg / x264 / x265 | Removed. OneBoard supplies decoded NumPy arrays to faster-whisper. A hash-gated staged lazy import permits faster-whisper to import without PyAV; standalone media-file decoding is not a supported portable-package feature. No PyAV or FFmpeg/codec DLL is shipped. |
+| Qt Multimedia / Qt FFmpeg | Removed. Source and packaged-window smoke require only QtCore, QtGui and QtWidgets. Qt Multimedia bindings, DLLs, plugins, QML and FFmpeg backend are excluded. |
+| cuDNN / CUDA runtime | Removed from the CPU package. The unnecessary `cudnn64_9.dll` copied by the upstream CTranslate2 wheel is excluded, and the builder rejects known NVIDIA runtime DLLs. |
+| CTranslate2 / Intel OpenMP | Retained for Whisper CPU inference with exact MIT, oneDNN, Intel EULA/OpenMP third-party and compiled-header notices. `libiomp5md.dll` is hash-pinned to the official Intel OpenMP 2025.3.0 Windows wheel. |
+| Nine missing Python licenses | Resolved with exact version/source/ref/license records and tracked full texts; see the next table. |
+| Unnecessary bulk | Tests, fixtures, caches, sample datasets, pip/ensurepip, debug/Tk helpers, native build files and unused Qt modules/plugins are removed by the builder without removing license subtrees. |
+
+## Supplemental Python distribution records
+
+These exact installed releases omitted a discoverable license file from their
+wheel/sdist. RC3 supplies the authoritative upstream text and pins provenance:
+
+| Distribution | Version | License | Authoritative source/ref | Packaged text |
+| --- | ---: | --- | --- | --- |
+| `antlr4-python3-runtime` | 4.9.3 | BSD-3-Clause | `antlr/antlr4`, tag `4.9.3`, commit `e4c1a74c66bd5290364ea2b36c97cd724b247357` | `LICENSES/ANTLR4-BSD-3-Clause.txt` |
+| `ctranslate2` | 4.8.2 | MIT | `OpenNMT/CTranslate2`, tag `v4.8.2`, commit `d44d2d069eb88c7b7804da864c10c201501cb4a9` | `LICENSES/CTranslate2-MIT.txt` plus the CTranslate2/oneDNN/Intel notice set |
+| `flatbuffers` | 25.12.19 | Apache-2.0 | `google/flatbuffers`, tag `v25.12.19`, commit `7e163021e59cca4f8e1e35a7c828b5c6b7915953` | `LICENSES/Apache-2.0.txt` |
+| `jamo` | 0.4.1 | Apache-2.0 | `JDongian/python-jamo`, tag `v0.4.1`, commit `d087a9f5f52f066fb933ad1da8e9915703374c9a` | `LICENSES/Jamo-Apache-2.0.txt` |
+| `jieba` | 0.42.1 | MIT | `fxsjy/jieba`, tag `v0.42.1`, commit `1e20c89b66f56c9301b0feed211733ffaa1bd72a` | `LICENSES/Jieba-MIT.txt` |
+| `loguru` | 0.7.3 | MIT | `Delgan/loguru`, tag `0.7.3`, commit `ae3bfd1b85b6b4a3db535f69b975687c79498be4` | `LICENSES/Loguru-MIT.txt` |
+| `sentencepiece` | 0.2.2 | Apache-2.0 | `google/sentencepiece`, tag `v0.2.2`, commit `e0cce7d37b065b5140349dbe12c6bcf6192fdd78` | `LICENSES/Apache-2.0.txt` |
+| `tokenizers` | 0.23.2 | Apache-2.0 | `huggingface/tokenizers`, tag `v0.23.2`, commit `88a4498ad4ea1a9487b0a9b0ff881383fd5a06a3` | `LICENSES/Apache-2.0.txt`; the wheel's CycloneDX SBOM is also retained |
+| `torch-complex` | 0.4.4 | Apache-2.0 | `kamo-naoyuki/pytorch_complex`, tag `v0.4.4`, commit `8a2ad1e47f3df25a30eb426f6ad781b89103fab3`; tagged package metadata declares Apache Software License although the repository omits a license file | `LICENSES/Apache-2.0.txt` |
+
+The torch-complex record states the exact upstream evidence and omission; it does
+not invent a copyright holder or a more specific license claim.
+
+## CTranslate2 native stack
+
+CTranslate2 `4.8.2` is required by faster-whisper. Its MIT text is in
+`LICENSES/CTranslate2-MIT.txt`. The official Windows build recipe at the pinned
+tag builds oneDNN `3.1.1` statically and uses Intel OpenMP `2025.3.0` dynamically.
+It also builds dynamically loaded CUDA support into the monolithic DLL. RC3
+cannot split that code safely, but it removes the separately copied cuDNN DLL,
+ships no CUDA runtime, advertises only CPU support, and validates CPU compute
+types.
+
+The reviewed stack is documented by:
+
+- `LICENSES/CTranslate2-Third-Party-Notices.txt` (cpu_features, spdlog/{fmt},
+  vendored CPU headers, CUTLASS and CCCL/Thrust/CUB/libcudacxx at the exact
+  CTranslate2 submodule commits);
+- `LICENSES/oneDNN-Apache-2.0.txt` and
+  `LICENSES/oneDNN-Third-Party-Programs.txt` for oneDNN tag `v3.1.1`, commit
+  `64f6bcbcbab628e96f33a62c3e975f8535a7bde4`;
+- `LICENSES/Intel-oneAPI-EULA.txt` and
+  `LICENSES/Intel-OpenMP-Third-Party-Programs.txt`, copied from the official
+  `intel-openmp==2025.3.0` Windows wheel whose `libiomp5md.dll` is byte-identical
+  to the CTranslate2 wheel file (SHA-256
+  `982233366b0afcda1e0f55a0b134097e35b779613f54ddb69e685e6cd06b755f`).
+
+Intel's terms apply separately to that Redistributable. The publisher must keep
+the required customer-license language and notices; this record does not provide
+legal advice about a particular distribution arrangement.
+
+## PyQt6 and Qt 6.11.2
+
+PyQt6 `6.11.0` is retained under its public wheel's `GPL-3.0-only` terms,
+consistent with the project's chosen GPL-3.0-only distribution. Qt is kept as
+replaceable shared libraries under the PyQt6-Qt6 `6.11.2` wheel's LGPLv3 terms.
+The package preserves both original wheel license files and adds the exact
+QtBase LGPL text.
+
+The retained Qt surface is limited to:
+
+- `Qt6Core.dll`, `Qt6Gui.dll`, `Qt6Widgets.dll` and matching PyQt bindings;
+- `qwindows`, `qminimal` and `qoffscreen` platform plugins;
+- `qmodernwindowsstyle`; and
+- `qgif`, `qico` and `qjpeg` image plugins.
+
+`LICENSES/Qt-6.11.2-Third-Party-Notices.txt` reproduces only the applicable
+Windows QtCore/QtGui/QtWidgets/qwindows/qjpeg attribution metadata and full
+license texts from QtBase tag `v6.11.2` (tag object
+`7a59d906fb765eb85759d4d3cae45d3f295f6359`, commit
+`ef55f427f2c8b410d34f8a7681020a3000cf6866`). Qt Multimedia, Qt FFmpeg,
+QML/Quick, WebEngine, SVG/PDF and `opengl32sw.dll` are not shipped, so their
+module/backend notices are not used to conceal uncertainty.
+
+Recipients can replace the Qt shared libraries in the runtime directory. The
+publisher must provide the exact corresponding source/relinking information with
+any public binary release and must not add restrictions that defeat applicable
+GPL/LGPL rights.
 
 ## Vendored FunASR source provenance
 
-All five files under `funasr_nano/` originate from the authoritative
-[`modelscope/FunASR`](https://github.com/modelscope/FunASR) repository at commit
-[`335eb1ea6156bc353283e21ae121a2224aa79175`](https://github.com/modelscope/FunASR/commit/335eb1ea6156bc353283e21ae121a2224aa79175).
-At the inherited LiveTranslate import commit
-`b549e858e37d684e3ca48f247901e439c580c3bb`, every local file was
-byte-identical to the corresponding file at that pinned FunASR revision.
+All five files under `funasr_nano/` originate from `modelscope/FunASR` commit
+`335eb1ea6156bc353283e21ae121a2224aa79175`. At inherited LiveTranslate import
+commit `b549e858e37d684e3ca48f247901e439c580c3bb`, every file was byte-identical.
+Four remain byte-identical; `funasr_nano/model.py` has only the documented model
+loading change from inherited commit `d536d55c71d040d654292cae8c716266d71c6779`.
 
-| Vendored path | Authoritative source path | Current status against the pinned revision |
-| --- | --- | --- |
-| `funasr_nano/__init__.py` | `funasr/models/fun_asr_nano/__init__.py` | Byte-identical |
-| `funasr_nano/ctc.py` | `funasr/models/fun_asr_nano/ctc.py` | Byte-identical |
-| `funasr_nano/model.py` | `funasr/models/fun_asr_nano/model.py` | Modified after import |
-| `funasr_nano/tools/__init__.py` | `funasr/models/fun_asr_nano/tools/__init__.py` | Byte-identical |
-| `funasr_nano/tools/utils.py` | `funasr/models/fun_asr_nano/tools/utils.py` | Byte-identical |
+| Vendored path | Pinned source path |
+| --- | --- |
+| `funasr_nano/__init__.py` | `funasr/models/fun_asr_nano/__init__.py` |
+| `funasr_nano/ctc.py` | `funasr/models/fun_asr_nano/ctc.py` |
+| `funasr_nano/model.py` | `funasr/models/fun_asr_nano/model.py` |
+| `funasr_nano/tools/__init__.py` | `funasr/models/fun_asr_nano/tools/__init__.py` |
+| `funasr_nano/tools/utils.py` | `funasr/models/fun_asr_nano/tools/utils.py` |
 
-The only post-import source change is inherited LiveTranslate commit
-`d536d55c71d040d654292cae8c716266d71c6779`, which changes `model.py` to load
-the causal language model with `from_pretrained(..., low_cpu_mem_usage=True)`
-instead of constructing it from `AutoConfig`. The pinned core source directory
-has no nested license or notice; the FunASR repository root applies the MIT
-license and `Copyright (c) 2025 FunASR`, reproduced in full in
-`LICENSES/FunASR-MIT.txt`.
+The pinned directory has no nested license; the repository-root MIT license,
+`Copyright (c) 2025 FunASR`, is reproduced in `LICENSES/FunASR-MIT.txt`.
 
-This finding covers only the vendored Python source. Downloaded FunASR model
-weights and derivatives remain governed by their own repository terms and the
-separate FunASR model agreement; their release review remains open.
+## Models and external services
 
-## Components needing release-publisher attention
+The base package contains no downloaded Whisper, SenseVoice, FunASR,
+Anime-Whisper, Qwen or Ollama model cache (`models_bundled: false`). Downloads
+require explicit user action and remain in the user's data directory. Models,
+remote APIs and Ollama retain their own terms. Separate download does not prove
+that every intended use is permitted; review the exact immutable model revision,
+model card, nested weights and provider terms before redistribution or a
+commercial deployment.
 
-| Component | How it is used | Published license information |
-| --- | --- | --- |
-| PyQt6 | Bundled Python UI bindings | Riverbank publishes PyQt6 under GNU GPL v3 or a Riverbank commercial license. The public wheel used by the current build reports `GPL-3.0-only`; PyQt is not LGPL. See [PyQt licensing](https://www.riverbankcomputing.com/software/pyqt/) and the artifact's PyQt6 license file. |
-| Qt 6 | Shared Qt libraries bundled by the PyQt6 wheel | The wheel currently reports LGPL v3. Qt also contains separately licensed third-party code, and some Qt modules have different licensing choices. See [Qt licensing](https://doc.qt.io/qt-6/licensing.html), [Qt third-party code](https://doc.qt.io/qt-6/licenses-used-in-qt.html), and the artifact's Qt license file. |
-| CPython 3.12 | Bundled interpreter and standard library | Python Software Foundation License Version 2 and other historical notices in `runtime/LICENSE.txt`. See [Python 3.12 licensing](https://docs.python.org/3.12/license.html). |
-| PyAV and FFmpeg libraries | A transitive audio/media dependency copied from the build environment | PyAV source is BSD-3-Clause, while its binary wheel bundles FFmpeg and codec libraries with separate terms. Review the exact DLL set and build configuration. See [PyAV](https://github.com/PyAV-Org/PyAV) and [PyAV FFmpeg builds](https://github.com/PyAV-Org/pyav-ffmpeg). |
-| `funasr_nano/*.py` | Vendored Fun-ASR-Nano implementation copied into every package | Provenance is verified against FunASR commit `335eb1ea6156bc353283e21ae121a2224aa79175`: four files remain byte-identical and `model.py` contains the documented inherited loading change. The applicable root license is MIT, `Copyright (c) 2025 FunASR`; the complete notice is shipped as `LICENSES/FunASR-MIT.txt`. This source finding does not clear downloaded model weights. |
-| soxr | Transitive resampling library | The current package metadata reports `LGPL-2.1-or-later`; see its installed license files. |
-| yasbd-lib | Sentence-boundary library | The current package metadata reports `MPL-2.0`; see its installed license file. |
-| PyTorch, CTranslate2, NumPy, SciPy, libsndfile, and other native wheels | Bundled ASR, numerical, and audio runtime | These packages contain or link additional native components. Their complete license files and notices remain in the artifact. Review the exact versions and binaries, rather than relying only on the top-level package label. |
-| Microsoft runtime DLLs | Runtime DLLs copied with CPython and Qt | Review the Microsoft redistribution terms that apply to the exact files in the release artifact. |
-
-Other required and transitive Python packages are predominantly published under
-MIT, BSD, Apache-2.0, ISC, MPL-2.0, or similarly identified terms. The complete
-set is build-dependent and is recorded in the two artifact inventories described
-above. Do not infer that an omitted package is absent from a particular build.
-
-## Models and external runtimes
-
-The base OneBoard Windows ZIP/installer does not contain downloaded Whisper,
-SenseVoice, FunASR, Anime-Whisper, or Qwen model caches. Model downloads require
-an explicit user action and are stored in the user's data directory. Model
-weights are licensed separately from the application and from the inference
-software.
-
-| Component | Packaging status | License information observed during this review |
-| --- | --- | --- |
-| Silero VAD | Its small VAD asset is included in the `silero-vad` Python wheel | The project and current wheel identify the VAD package/model as MIT. See [Silero VAD](https://github.com/snakers4/silero-vad) and its artifact license file. |
-| `Systran/faster-whisper-small` | Default ASR model; downloaded separately and not pinned to a repository revision | The current Hugging Face model card identifies the converted checkpoint as MIT. See [faster-whisper-small](https://huggingface.co/Systran/faster-whisper-small). Recheck and retain the exact license at download/release time. |
-| `qwen3:4b-instruct-2507-q4_K_M` | Default translation model; downloaded by the user's Ollama service, not bundled | The current Ollama tag (displayed digest prefix `0edcdef34593`) embeds Apache License 2.0. See the [exact Ollama model tag](https://ollama.com/library/qwen3:4b-instruct-2507-q4_K_M) and the [upstream Qwen checkpoint](https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507). Recheck the tag/digest and license before any publisher-hosted redistribution. |
-| SenseVoice Small | Optional Advanced model; downloaded separately | The available hubs do not present one consistent label: the current Hugging Face page uses `model-license`, while the ModelScope page has displayed Apache-2.0. The FunASR project separately publishes a FunASR Model Open Source License Agreement. Preserve the exact downloaded license and obtain manual review before commercial use or redistribution. |
-| Fun-ASR-Nano / Fun-ASR-MLT-Nano | Optional Advanced models; downloaded separately and may include Qwen3-0.6B weights | Current hub pages have displayed Apache-2.0, while the FunASR repository also publishes a separate model agreement. Verify every downloaded repository, nested weight, revision, and attribution requirement before use or redistribution. See the [FunASR model agreement](https://github.com/modelscope/FunASR/blob/main/MODEL_LICENSE). |
-| `litagin/anime-whisper` | Optional Advanced model; downloaded separately | The current model card identifies it as MIT. Its base-model and training-data provenance should still be reviewed for the intended release/use. See [Anime-Whisper](https://huggingface.co/litagin/anime-whisper). |
-| Ollama | Managed prerequisite installed separately by the user; it is not in the OneBoard package | The Ollama source repository currently uses MIT. Models served by Ollama retain their own licenses. See [Ollama's license](https://github.com/ollama/ollama/blob/main/LICENSE). |
-| NVIDIA/CUDA components | Not included in the current CPU Windows package | A future GPU build requires a new component inventory and review of the exact NVIDIA/CUDA/cuDNN redistribution terms. |
-
-Remote APIs and user-selected models exposed through Advanced settings are not
-distributed by OneBoard. Their provider terms and model licenses apply separately.
+The included Silero VAD wheel asset and all other retained Python/native package
+licenses are recorded in the generated inventories and original distribution
+notice files. Microsoft runtime files retain their applicable redistribution
+terms. A future GPU artifact requires a new binary and license audit.

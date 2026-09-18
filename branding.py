@@ -1,5 +1,7 @@
 """Centralized product branding for the OneBoard distribution."""
 
+from version import VERSION as APP_VERSION, WINDOWS_VERSION as WINDOWS_FILE_VERSION
+
 APP_NAME = "OneBoard Live Translate"
 APP_SHORT_NAME = "OneBoardLiveTranslate"
 COMPANY_NAME = "OneBoard"

@@ -1,6 +1,8 @@
 """Regression coverage for release isolation and user-data preservation."""
 
+import hashlib
 import importlib.util
+import shutil
 import zipfile
 from pathlib import Path
 
@@ -160,6 +162,15 @@ def test_revoked_version_allows_only_unarchived_staging_smoke():
     )
 
 
+def test_rc2_artifacts_cannot_be_rebuilt_or_overwritten():
+    builder = load_builder()
+
+    with pytest.raises(RuntimeError, match="version 0.2.0-rc2 is revoked"):
+        builder.validate_artifact_version(
+            "0.2.0-rc2", skip_archive=False, iscc=None
+        )
+
+
 def test_dependency_inventory_filters_cache_noise_from_notice_paths():
     files = [
         Path("package.dist-info/licenses/LICENSE"),
@@ -180,7 +191,11 @@ def test_dependency_inventory_requires_each_notice_in_stage(tmp_path):
     notice = stage / "runtime" / "Lib" / "site-packages" / relative
     notice.parent.mkdir(parents=True)
     notice.write_text("license", encoding="utf-8")
-    records = [{"name": "package", "license_files": [str(relative)]}]
+    records = [{
+        "name": "package",
+        "license_files": [str(relative)],
+        "supplemental_license_files": [],
+    }]
 
     builder.verify_dependency_notice_inventory(stage, records)
 
@@ -190,7 +205,11 @@ def test_dependency_inventory_requires_each_notice_in_stage(tmp_path):
 
 
 def test_dependency_inventory_rejects_notice_paths_outside_runtime(tmp_path):
-    records = [{"name": "package", "license_files": ["../../../../outside/LICENSE"]}]
+    records = [{
+        "name": "package",
+        "license_files": ["../../../../outside/LICENSE"],
+        "supplemental_license_files": [],
+    }]
 
     with pytest.raises(RuntimeError, match="outside runtime"):
         load_builder().verify_dependency_notice_inventory(tmp_path / "stage", records)
@@ -201,10 +220,7 @@ def test_release_notices_are_mandatory_and_preserve_layout(tmp_path):
     source = tmp_path / "source"
     stage = tmp_path / "stage"
     expected = {
-        Path("LICENSE"): "GPL project license",
-        Path("LICENSES/FunASR-MIT.txt"): "FunASR MIT attribution",
-        Path("LICENSES/LiveTranslate-MIT.txt"): "upstream MIT attribution",
-        Path("THIRD_PARTY_NOTICES.md"): "dependency notices",
+        relative: relative.as_posix() for relative in builder.RELEASE_NOTICE_FILES
     }
     for relative, content in expected.items():
         path = source / relative
@@ -269,6 +285,9 @@ def test_customer_readme_exposes_source_and_all_license_records():
     assert "LICENSES/FunASR-MIT.txt" in readme
     assert "LICENSES/LiveTranslate-MIT.txt" in readme
     assert "THIRD_PARTY_NOTICES.md" in readme
+    assert "CPU portable package" in readme
+    assert "no CUDA, cuDNN, PyAV, FFmpeg or Qt Multimedia" in readme
+    assert "native-component-inventory.json" in readme
 
 
 def test_installer_recursively_includes_verified_stage_and_displays_gpl_license():
@@ -285,6 +304,103 @@ def test_dependency_copy_excludes_development_only_packages_and_test_trees():
     assert ignored == {
         "pytest", "pytest-9.1.1.dist-info", "_pytest", "pluggy", "iniconfig", "tests", "_tests", "testdata", "SelfTest",
     }
+
+
+def test_dependency_copy_excludes_rc3_unused_runtime_and_debug_binaries():
+    ignored = load_builder().ignored_runtime_files(
+        "unused",
+        [
+            "av",
+            "av.libs",
+            "av-18.1.0.dist-info",
+            "pip",
+            "pip-25.2.dist-info",
+            "_asyncio_d.pyd",
+            "sqlite3_d.dll",
+            "_testcapi.pyd",
+            "_ctypes_test.pyd",
+            "_tkinter.pyd",
+            "runtime.pyd",
+        ],
+    )
+
+    assert ignored == {
+        "av",
+        "av.libs",
+        "av-18.1.0.dist-info",
+        "pip",
+        "pip-25.2.dist-info",
+        "_asyncio_d.pyd",
+        "sqlite3_d.dll",
+        "_testcapi.pyd",
+        "_ctypes_test.pyd",
+        "_tkinter.pyd",
+    }
+
+
+def test_missing_license_set_has_pinned_supplemental_records():
+    builder = load_builder()
+    expected = {
+        "antlr4-python3-runtime",
+        "ctranslate2",
+        "flatbuffers",
+        "jamo",
+        "jieba",
+        "loguru",
+        "sentencepiece",
+        "tokenizers",
+        "torch-complex",
+    }
+
+    assert set(builder.SUPPLEMENTAL_LICENSE_RECORDS) == expected
+    for record in builder.SUPPLEMENTAL_LICENSE_RECORDS.values():
+        assert record["version"]
+        assert record["license_expression"]
+        assert record["source"].startswith("https://")
+        assert record["source_ref"]
+        assert record["license_files"]
+        assert all((builder.ROOT / name).is_file() for name in record["license_files"])
+
+
+def test_dependency_inventory_rejects_record_without_any_license(tmp_path):
+    records = [{
+        "name": "unlicensed",
+        "license_files": [],
+        "supplemental_license_files": [],
+    }]
+
+    with pytest.raises(RuntimeError, match="no auditable license file"):
+        load_builder().verify_dependency_notice_inventory(tmp_path / "stage", records)
+
+
+def test_faster_whisper_patch_is_hash_gated_and_removes_eager_pyav(tmp_path):
+    builder = load_builder()
+    source = Path(importlib.util.find_spec("faster_whisper").origin).parent / "audio.py"
+    assert hashlib.sha256(source.read_bytes()).hexdigest() == (
+        builder.FASTER_WHISPER_AUDIO_SHA256
+    )
+    runtime = tmp_path / "runtime"
+    destination = runtime / "Lib/site-packages/faster_whisper/audio.py"
+    destination.parent.mkdir(parents=True)
+    shutil.copy2(source, destination)
+
+    builder.patch_faster_whisper_audio(runtime)
+
+    patched = destination.read_text(encoding="utf-8")
+    assert "def _require_av" in patched
+    assert "import av" not in patched.split("def _require_av", 1)[0]
+    assert "av = _require_av()" in patched
+
+
+def test_rc3_runtime_allowlists_exclude_previous_blockers():
+    builder = load_builder()
+
+    assert not any("Multimedia" in name for name in builder.QT_BINDINGS)
+    assert not any("Multimedia" in name for name in builder.QT_DLLS)
+    assert not any(name.startswith("av") for name in builder.QT_DLLS)
+    assert "opengl32sw.dll" not in builder.QT_DLLS
+    assert not any("multimedia/" in name for name in builder.QT_PLUGINS)
+    assert not any("ffmpeg" in name for name in builder.QT_PLUGINS)
 
 
 @pytest.mark.parametrize(

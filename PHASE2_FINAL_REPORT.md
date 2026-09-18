@@ -1,5 +1,8 @@
 # OneBoard Live Translate Phase 2 Final Report
 
+> Historical RC1 record. For the current RC3 decision, use
+> `RELEASE_LICENSING_REVIEW.md` and `RC3_RUNTIME_AUDIT.md`.
+
 Report date: 2026-09-10
 
 Licensing decision updated: 2026-09-11

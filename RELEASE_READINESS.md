@@ -1,5 +1,8 @@
 # OneBoard Live Translate MVP release readiness
 
+> Historical RC1 record. For the current RC3 decision, use
+> `RELEASE_LICENSING_REVIEW.md` and `RC3_RUNTIME_AUDIT.md`.
+
 Audit date: 2026-09-10
 
 Project-license decision updated: 2026-09-11

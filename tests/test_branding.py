@@ -5,13 +5,16 @@ import yaml
 from branding import (
     APP_NAME,
     APP_SHORT_NAME,
+    APP_VERSION,
     COMPANY_NAME,
     OPEN_SOURCE_NOTICE,
     PRODUCT_NAME,
     PROJECT_LICENSE,
     UPSTREAM_PROJECT_NAME,
     UPSTREAM_PROJECT_URL,
+    WINDOWS_FILE_VERSION,
 )
+from version import VERSION, WINDOWS_VERSION
 
 
 def _strings(language: str) -> dict:
@@ -27,6 +30,11 @@ def test_branding_constants():
     assert PROJECT_LICENSE == "GPL-3.0-only"
     assert UPSTREAM_PROJECT_NAME == "LiveTranslate"
     assert UPSTREAM_PROJECT_URL == "https://github.com/TheDeathDragon/LiveTranslate"
+
+
+def test_rc3_version_is_centralized_for_branding_and_windows_metadata():
+    assert VERSION == APP_VERSION == "0.2.0-rc3"
+    assert WINDOWS_VERSION == WINDOWS_FILE_VERSION == "0.2.0.3"
 
 
 def test_open_source_notice_exposes_release_licensing_and_attribution():
